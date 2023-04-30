@@ -20,7 +20,7 @@ public class Server{
     private static int messages = 0;
 
     private static final String[] SERVER_IP = {"10.176.69.32","10.176.69.33","10.176.69.34","10.176.69.35","10.176.69.36","10.176.69.37","10.176.69.38","10.176.69.39"};
-    private static HashMap<Integer, Socket> connectedSockets;
+    private static HashMap<Integer, Socket> connectedSockets = new HashMap<Integer, Socket>();
     private static ArrayList<Integer> partition;
     private static int versionNum = 1;
     private static int replicasUpdate = 8;
@@ -47,6 +47,7 @@ public class Server{
         newPartition(initPartition);
 
         messages = 2;
+        disconnect(connectedSockets);
         newPartition(generatePartition());
 
         //Run Server
@@ -106,6 +107,7 @@ public class Server{
                 newPartition = new ArrayList<>(Arrays.asList(1,2,3,4,5,6));  
         }
 
+        System.out.println(newPartition);
         return newPartition;
     }
 
@@ -128,18 +130,18 @@ public class Server{
         for(int s : newPartition) {
             //Connect to the server
             if(s != serverID) {
+                System.out.println("Connecting to " + s);
                 String ip = SERVER_IP[s];
 
-                if(!connectedSockets.containsKey(s))
-                    newPartitionSockets.put(s, new Socket(ip, PORT));
-                else
-                    newPartitionSockets.put(s, connectedSockets.get(s));
+                newPartitionSockets.put(s, new Socket(ip, PORT));
             }
 
             //Accept all connections in the partition
             else {
                 System.out.println("Accepting Connections");
                 for(int i = 0; i < newPartition.size() - 1; i++) {
+                    System.out.println(i);
+
                     serverSocket.accept();     
                 }
             }
@@ -147,5 +149,12 @@ public class Server{
 
         partition = newPartition;
         connectedSockets = newPartitionSockets;
+    }
+
+    private static void disconnect(HashMap<Integer, Socket> socketMap) throws IOException
+    {
+        for(Entry<Integer, Socket> e : socketMap.entrySet()) {
+            e.getValue().close();
+        }
     }
 }
