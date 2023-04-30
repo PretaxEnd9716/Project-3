@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Map.Entry;
+import java.util.Arrays;
 
 public class Server{
 
@@ -43,7 +44,7 @@ public class Server{
         
         try {
         //Connect to Initial Partition
-        ArrayList<Integer> newPartition = new ArrayList<>(List.of(0,1,2));
+        ArrayList<Integer> newPartition = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,7));
         newPartition(newPartition);
 
         //Run Server
@@ -68,9 +69,10 @@ public class Server{
             System.out.println("Closing Server");
 
             //Close connections
-            client.close();
+            // client.close();
 
             for(Entry<Integer, Socket> e : connectedSockets.entrySet()) {
+                System.out.println(e.getKey() + ":" + e.getValue().getInetAddress().getHostAddress());
                 e.getValue().close();
             }
         }
@@ -102,8 +104,9 @@ public class Server{
 
             //Accept all connections in the partition
             else {
-                for(int i = 0; i < partition.size() - 1; i++) {
-                    serverSocket.accept();
+                System.out.println("Accepting Connections");
+                for(int i = 0; i < newPartition.size() - 1; i++) {
+                    serverSocket.accept();     
                 }
             }
         }
