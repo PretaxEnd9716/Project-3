@@ -2,7 +2,6 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.Arrays;
@@ -44,20 +43,23 @@ public class Server{
         
         try {
         //Connect to Initial Partition
-        ArrayList<Integer> newPartition = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,7));
-        newPartition(newPartition);
+        ArrayList<Integer> initPartition = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,7));
+        newPartition(initPartition);
+
+        messages = 2;
+        newPartition(generatePartition());
 
         //Run Server
-        // while(messages >= 8)
-        // {
+        // while(messages >= 8) {
         //     //Receive messages
         //     receiveMessage(fromClient);
         //     messages++;
 
-        //     //Create new partition
-        //     if(messages % 2 == 0)
-        //     {
+        //     //Print VN, RU, DS
 
+        //     //Create new partition
+        //     if(messages % 2 == 0) {
+        //         newPartition(generatePartition());
         //     }
         // }
 
@@ -76,6 +78,35 @@ public class Server{
                 e.getValue().close();
             }
         }
+    }
+
+    private static ArrayList<Integer> generatePartition() {
+        ArrayList<Integer> newPartition;
+
+        if(messages == 2) {
+            if(serverID <= 3)
+                newPartition = new ArrayList<>(Arrays.asList(0,1,2,3));
+            else
+                newPartition = new ArrayList<>(Arrays.asList(4,5,6,7));
+        }
+        else if(messages == 4) {
+            if(serverID == 0)
+                newPartition = new ArrayList<>(Arrays.asList(0));
+            else if(serverID <= 3)
+                newPartition = new ArrayList<>(Arrays.asList(1,2,3));
+            else if(serverID < 7)
+                newPartition = new ArrayList<>(Arrays.asList(4,5,6)); 
+            else
+                newPartition = new ArrayList<>(Arrays.asList(7));  
+        }
+        else {
+            if(serverID ==  0 || serverID == 7)
+                newPartition = partition;
+            else
+                newPartition = new ArrayList<>(Arrays.asList(1,2,3,4,5,6));  
+        }
+
+        return newPartition;
     }
 
     private static String receiveMessage(BufferedReader reader) throws IOException {
@@ -99,7 +130,10 @@ public class Server{
             if(s != serverID) {
                 String ip = SERVER_IP[s];
 
-                newPartitionSockets.put(s, new Socket(ip, PORT));
+                if(!connectedSockets.containsKey(s))
+                    newPartitionSockets.put(s, new Socket(ip, PORT));
+                else
+                    newPartitionSockets.put(s, connectedSockets.get(s));
             }
 
             //Accept all connections in the partition
