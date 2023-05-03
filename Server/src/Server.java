@@ -13,13 +13,13 @@ public class Server {
 
     private static Socket client;
     private static BufferedReader fromClient;
-    private static String data;
     private static int messages = 0;
 
     private static final int PORT = 8000;
     private static final String[] SERVER_IP = {"10.176.69.32","10.176.69.33","10.176.69.34","10.176.69.35","10.176.69.36","10.176.69.37","10.176.69.38","10.176.69.39"};
     private static HashMap<Integer, ServerHandler> connectedSockets;
     private static ArrayList<Integer> partition;
+    private static HashMap<Integer, BufferedReader> serverReaders;
 
     private static int versionNum = 1;
     private static int replicasUpdate = 8;
@@ -48,13 +48,13 @@ public class Server {
             client = serverSocket.accept();
             fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-            System.out.println(receiveMessage(fromClient));
+            System.out.println("\nMessage: " + receiveMessage(fromClient));
             messages++;
 
             if(hasMajority) {
                 System.out.println("Write Successful");
                 versionNum++;
-                replicasUpdate++
+                replicasUpdate++;
             }
             else {
                 System.out.println("Write Unsuccessful");
@@ -66,8 +66,9 @@ public class Server {
             System.out.println("Distinguished Site: " + distinguishedSite);
 
             //Create new partition
-            if(messages % 2 == 0 && messages > 0) {
+            if(messages % 2 == 0 && messages > 0 && messages < 8) {
                 newPartition(generatePartition());
+                updatePartitionData(connectedSockets);
             }
 
             client.close();
@@ -88,7 +89,7 @@ public class Server {
     }
 
     private static ArrayList<Integer> generatePartition() {
-        ArrayList<Integer> newPartition;
+        ArrayList<Integer> newPartition = new ArrayList<>();;
 
         hasMajority = false;
 
@@ -114,7 +115,7 @@ public class Server {
             else
                 newPartition = new ArrayList<>(Arrays.asList(7));  
         }
-        else {
+        else if(messages < 8){
             if(serverID ==  0 || serverID == 7)
                 newPartition = new ArrayList<>(Arrays.asList(serverID));
             else {
@@ -124,7 +125,7 @@ public class Server {
                  
         }
 
-        System.out.println(newPartition);
+        System.out.println("\nNew Partition: " + newPartition);
         return newPartition;
     }
 
@@ -140,6 +141,7 @@ public class Server {
 
     private static HashMap<Integer, ServerHandler> newPartition (ArrayList<Integer> newPartition) throws UnknownHostException, IOException {
         HashMap<Integer, ServerHandler> newConnection = new HashMap<Integer, ServerHandler>();
+        HashMap<Integer, BufferedReader> serverReaders = new HashMap<Integer, BufferedReader>();
 
         //Check the size of the partition
         if(newPartition.size() != 1) {
@@ -153,12 +155,13 @@ public class Server {
                 else {
                     for(int i = 0; i < newPartition.size() - 1; i++)
                     {
-                        serverSocket.accept();
+                        Socket cs = serverSocket.accept();
                     }
                 }
             }
         }
 
+        partition = newPartition;
         return newConnection;
     }
 
@@ -193,9 +196,16 @@ public class Server {
             RUList.add(serverRU);
         }
 
-        //Update VN,RU,and DS
-        versionNum = Collections.max(VNList);
-        replicasUpdate = Collections.max(RUList);
-        distinguishedSite = Collections.min(partition);
+        if(hasMajority) {
+            //Update VN,RU,and DS
+            versionNum = Collections.max(VNList);
+            replicasUpdate = Collections.max(RUList);
+            distinguishedSite = Collections.min(partition);
+        }
+        
+        if(hasMajority && versionNum < messages + 1) {
+            versionNum = messages + 1;
+            replicasUpdate = messages + 8;
+        }
     }
 }
