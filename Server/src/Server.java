@@ -23,7 +23,8 @@ public class Server {
 
     private static int versionNum = 1;
     private static int replicasUpdate = 8;
-    private static int distinguishedSite = 1;
+    private static int distinguishedSite = 0;
+    private static boolean hasMajority = true;
 
     public static void main(String[] args) throws Exception {
 
@@ -35,50 +36,68 @@ public class Server {
         System.out.println("Enter Server ID");
         serverID = Integer.parseInt(keyboard.nextLine());
         keyboard.close();
-
-        //Accept Client
-        // client = serverSocket.accept();
-        // fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
         
         try {
         //Connect to Initial Partition
-        ArrayList<Integer> initPartition = new ArrayList<>(Arrays.asList(0,1));
+        ArrayList<Integer> initPartition = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,7));
         connectedSockets = newPartition(initPartition);
 
         //Run Server
-        // while(messages >= 8) {
-        //     //Receive messages
-        //     receiveMessage(fromClient);
-        //     messages++;
+        while(messages != 8) {
+            //Receive messages
+            client = serverSocket.accept();
+            fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-        //     //Print VN, RU, DS
+            System.out.println(receiveMessage(fromClient));
+            messages++;
 
-        //     //Create new partition
-        //     if(messages % 2 == 0) {
-        //         newPartition(generatePartition());
-        //     }
-        // }
+            if(hasMajority) {
+                System.out.println("Write Successful");
+                versionNum++;
+                replicasUpdate++
+            }
+            else {
+                System.out.println("Write Unsuccessful");
+            }
 
+            //Print VN, RU, DS
+            System.out.println("Version Number: " + versionNum);
+            System.out.println("Replicas Updated: " + replicasUpdate);
+            System.out.println("Distinguished Site: " + distinguishedSite);
+
+            //Create new partition
+            if(messages % 2 == 0 && messages > 0) {
+                newPartition(generatePartition());
+            }
+
+            client.close();
+        }
+            disconnect(connectedSockets);
         }
         catch(Exception e) {
             e.printStackTrace();
+            
         }
         finally {
             System.out.println("Closing Server");
-
-            //Close Connections
             disconnect(connectedSockets);
-
-            // client.close();
+            client.close();
+            fromClient.close();
+            System.exit(0);
         }
     }
 
     private static ArrayList<Integer> generatePartition() {
         ArrayList<Integer> newPartition;
 
+        hasMajority = false;
+
         if(messages == 2) {
-            if(serverID <= 3)
+            if(serverID <= 3) {
                 newPartition = new ArrayList<>(Arrays.asList(0,1,2,3));
+                hasMajority = true;
+            }
+                
             else
                 newPartition = new ArrayList<>(Arrays.asList(4,5,6,7));
         }
@@ -86,7 +105,10 @@ public class Server {
             if(serverID == 0)
                 newPartition = new ArrayList<>(Arrays.asList(0));
             else if(serverID <= 3)
+            {
                 newPartition = new ArrayList<>(Arrays.asList(1,2,3));
+                hasMajority = true;
+            }
             else if(serverID < 7)
                 newPartition = new ArrayList<>(Arrays.asList(4,5,6)); 
             else
@@ -94,9 +116,12 @@ public class Server {
         }
         else {
             if(serverID ==  0 || serverID == 7)
-                newPartition = partition;
-            else
-                newPartition = new ArrayList<>(Arrays.asList(1,2,3,4,5,6));  
+                newPartition = new ArrayList<>(Arrays.asList(serverID));
+            else {
+                newPartition = new ArrayList<>(Arrays.asList(1,2,3,4,5,6)); 
+                hasMajority = true;
+            }
+                 
         }
 
         System.out.println(newPartition);
@@ -123,6 +148,7 @@ public class Server {
                 if(server != serverID) {
                     newConnection.put(server,new ServerHandler(SERVER_IP[server]));
                     newConnection.get(server).init();
+                    System.out.println("Connected to Server " + server);
                 }
                 else {
                     for(int i = 0; i < newPartition.size() - 1; i++)
@@ -137,7 +163,7 @@ public class Server {
     }
 
     //Terminates all server handler threads
-    private static void disconnect(HashMap<Integer, ServerHandler> servers) throws IOException {
+    private static void disconnect(HashMap<Integer, ServerHandler> servers) throws Exception {
         for(Entry<Integer, ServerHandler> e : servers.entrySet()) {
             e.getValue().terminate();
         }
@@ -146,32 +172,30 @@ public class Server {
     private static void updatePartitionData(HashMap<Integer, ServerHandler> servers) throws IOException {
         ArrayList<String> serverData = new ArrayList<>();
 
+        String data = versionNum + ":" + replicasUpdate;
         //Go through each connected server and request for VN, RU, DS
         for(Entry<Integer, ServerHandler> e : servers.entrySet()) {
-            e.getValue().request();
+            e.getValue().request(data);
             serverData.add(e.getValue().obtainMessage());
         }
 
         //Go through each message and obtain the data 
         ArrayList<Integer> VNList = new ArrayList<>();
         ArrayList<Integer> RUList = new ArrayList<>();
-        ArrayList<Integer> DSList = new ArrayList<>();
 
         for(String s : serverData)
         {
-            String[] split = s.split(s);
+            String[] split = s.split(":");
             int serverVN = Integer.parseInt(split[0]);
             int serverRU = Integer.parseInt(split[1]);
-            int serverDS = Integer.parseInt(split[2]);
 
             VNList.add(serverVN);
             RUList.add(serverRU);
-            DSList.add(serverDS);
         }
 
         //Update VN,RU,and DS
         versionNum = Collections.max(VNList);
         replicasUpdate = Collections.max(RUList);
-        distinguishedSite = Collections.min(DSList);
+        distinguishedSite = Collections.min(partition);
     }
 }

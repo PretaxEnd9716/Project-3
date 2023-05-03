@@ -19,12 +19,12 @@ public class App {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String message;
 
-        while (true) {
+        for (int messages = 0; messages < 8; messages++) {
             try {
                 System.out.print("Enter a message to send to servers: ");
                 message = reader.readLine();
 
-                for (int i = 0; i < SERVER_IP.length ; i++,port++) {
+                for (int i = 0; i < SERVER_IP.length ; i++) {
                     
                     try {
                         Socket socket = new Socket(SERVER_IP[i], port);
