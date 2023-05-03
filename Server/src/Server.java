@@ -2,19 +2,12 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.Arrays;
+import java.util.Collections;
 
-public class Server{
-
-    private static final int PORT = 8000;
-    private static final String[] ipArr = {};
-
+public class Server {
     private static int serverID;
     private static ServerSocket serverSocket;
 
@@ -23,10 +16,9 @@ public class Server{
     private static String data;
     private static int messages = 0;
 
+    private static final int PORT = 8000;
     private static final String[] SERVER_IP = {"10.176.69.32","10.176.69.33","10.176.69.34","10.176.69.35","10.176.69.36","10.176.69.37","10.176.69.38","10.176.69.39"};
-    private static HashMap<Integer, Socket> connectedSockets = new HashMap<Integer, Socket>();
-    private static HashMap<Integer, PrintWriter> writeHash;
-    private static HashMap<Integer, BufferedReader> readHash;
+    private static HashMap<Integer, ServerHandler> connectedSockets;
     private static ArrayList<Integer> partition;
 
     private static int versionNum = 1;
@@ -50,14 +42,8 @@ public class Server{
         
         try {
         //Connect to Initial Partition
-        ArrayList<Integer> initPartition = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,7));
-        newPartition(initPartition);
-        System.out.println(updatePartitionData(writeHash, readHash));
-
-        messages = 2;
-        disconnect(connectedSockets, writeHash, readHash);
-        newPartition(generatePartition());
-        System.out.println(updatePartitionData(writeHash, readHash));
+        ArrayList<Integer> initPartition = new ArrayList<>(Arrays.asList(0,1));
+        connectedSockets = newPartition(initPartition);
 
         //Run Server
         // while(messages >= 8) {
@@ -80,13 +66,10 @@ public class Server{
         finally {
             System.out.println("Closing Server");
 
-            //Close connections
-            // client.close();
+            //Close Connections
+            disconnect(connectedSockets);
 
-            for(Entry<Integer, Socket> e : connectedSockets.entrySet()) {
-                System.out.println(e.getKey() + ":" + e.getValue().getInetAddress().getHostAddress());
-                e.getValue().close();
-            }
+            // client.close();
         }
     }
 
@@ -130,80 +113,65 @@ public class Server{
         return output;
     }
 
-    private static void newPartition(ArrayList<Integer> newPartition) throws UnknownHostException, IOException {
+    private static HashMap<Integer, ServerHandler> newPartition (ArrayList<Integer> newPartition) throws UnknownHostException, IOException {
+        HashMap<Integer, ServerHandler> newConnection = new HashMap<Integer, ServerHandler>();
 
-        //Hashmap to store connection
-        HashMap<Integer, Socket> newPartitionSockets = new HashMap<Integer, Socket>();
-        HashMap<Integer, PrintWriter> newWriteHash = new HashMap<Integer, PrintWriter>();
-        HashMap<Integer, BufferedReader> newReadHash = new HashMap<Integer, BufferedReader>();
-        
-        //Create partition hashmap
-        if(newPartition.size() == 1) {
-            partition = newPartition;
-            connectedSockets = newPartitionSockets;
-            writeHash = newWriteHash;
-            readHash = newReadHash;
-        }
-
-        else {
-            for(int s : newPartition) {
-                //Connect to the server
-                if(s != serverID) {
-                    System.out.println("Connecting to " + s);
-                    String ip = SERVER_IP[s];
-
-                    newPartitionSockets.put(s, new Socket(ip, PORT));
-
-                    //Create read and write hashmaps
-                    newWriteHash.put(s,new PrintWriter(newPartitionSockets.get(s).getOutputStream(), true));
-                    newReadHash.put(s, new BufferedReader(new InputStreamReader(newPartitionSockets.get(s).getInputStream())));
+        //Check the size of the partition
+        if(newPartition.size() != 1) {
+            //Go through each servers
+            for(int server : newPartition) {
+                if(server != serverID) {
+                    newConnection.put(server,new ServerHandler(SERVER_IP[server]));
+                    newConnection.get(server).init();
                 }
-
-                //Accept all connections in the partition
                 else {
-                    System.out.println("Accepting Connections");
-                    for(int i = 0; i < newPartition.size() - 1; i++) {
-                        System.out.println(i);
-
-                        serverSocket.accept();     
+                    for(int i = 0; i < newPartition.size() - 1; i++)
+                    {
+                        serverSocket.accept();
                     }
                 }
             }
+        }
 
-            partition = newPartition;
-            connectedSockets = newPartitionSockets;
-            writeHash = newWriteHash;
-            readHash = newReadHash;
+        return newConnection;
+    }
+
+    //Terminates all server handler threads
+    private static void disconnect(HashMap<Integer, ServerHandler> servers) throws IOException {
+        for(Entry<Integer, ServerHandler> e : servers.entrySet()) {
+            e.getValue().terminate();
         }
     }
 
-    private static void disconnect(HashMap<Integer, Socket> socketHash, HashMap<Integer, PrintWriter> writeHash, HashMap<Integer, BufferedReader> readHash) throws IOException {
-        for(Entry<Integer, Socket> e : socketHash.entrySet()) {
-            e.getValue().close();
+    private static void updatePartitionData(HashMap<Integer, ServerHandler> servers) throws IOException {
+        ArrayList<String> serverData = new ArrayList<>();
+
+        //Go through each connected server and request for VN, RU, DS
+        for(Entry<Integer, ServerHandler> e : servers.entrySet()) {
+            e.getValue().request();
+            serverData.add(e.getValue().obtainMessage());
         }
 
-        for(Entry<Integer, PrintWriter> e : writeHash.entrySet()) {
-            e.getValue().close();
+        //Go through each message and obtain the data 
+        ArrayList<Integer> VNList = new ArrayList<>();
+        ArrayList<Integer> RUList = new ArrayList<>();
+        ArrayList<Integer> DSList = new ArrayList<>();
+
+        for(String s : serverData)
+        {
+            String[] split = s.split(s);
+            int serverVN = Integer.parseInt(split[0]);
+            int serverRU = Integer.parseInt(split[1]);
+            int serverDS = Integer.parseInt(split[2]);
+
+            VNList.add(serverVN);
+            RUList.add(serverRU);
+            DSList.add(serverDS);
         }
 
-        for(Entry<Integer, BufferedReader> e : readHash.entrySet()) {
-            e.getValue().close();
-        }
-    }
-
-    private static ArrayList<String> updatePartitionData(HashMap<Integer, PrintWriter> writeHash, HashMap<Integer, BufferedReader> readHash) throws IOException {
-        ArrayList<String> result = new ArrayList<>();
-
-        for(int s : partition) {
-            if(s != serverID)
-                writeHash.get(s).println(serverID);
-            else {
-                for(int i = 0; i < partition.size()-1; i++) {
-                    result.add(receiveMessage(readHash.get(partition.get(i))));
-                }
-            }
-        }
-
-        return result;
+        //Update VN,RU,and DS
+        versionNum = Collections.max(VNList);
+        replicasUpdate = Collections.max(RUList);
+        distinguishedSite = Collections.min(DSList);
     }
 }
