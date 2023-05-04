@@ -12,6 +12,7 @@ public class ServerHandler implements Runnable {
     private String ip;
     private String data;
     private String message;
+    private Thread t;
 
     public ServerHandler(String ip)
     {
@@ -28,7 +29,8 @@ public class ServerHandler implements Runnable {
         request = false;
         message = "EMPTY";
 
-        new Thread(this).start();
+        t = new Thread(this);
+        t.start();
     }
 
     private static String receiveMessage(BufferedReader reader) throws IOException {
@@ -46,54 +48,39 @@ public class ServerHandler implements Runnable {
     }
 
     public void run() {
-        while(running) {
-            if(request) {
-                try {
+
+        try {
+        
+            while(running) {
+                if(request) {
                     //Obtain VN,RU,DS
                     toServer.println(data);
                     message = receiveMessage(fromServer);
-
-                    //Wait for a new request
-                    this.wait();
-                }
-                catch (Exception e) {
-                    terminate();
-                    e.printStackTrace();
                 }
             }
-        }
 
-        //Close Sockets
-        try {
             s.close();
             toServer.close();
             fromServer.close();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
+        
     }
 
-    public void request() {
+    public void request(String message) {
         request = true;
-        this.notify();
+        this.message = message;
     }
 
     public String obtainMessage() {
-        String output;
+        String output = message;
 
-        //Wait for the message
-        while(true) {
-            if(message != "EMPTY") {
-                output = message;
-                break;
-            }
-        }
-
-        //Reset message for the next request
         message = "EMPTY";
 
         return output;
     }
+
+    public Socket getSocket() { return s; }
 }
