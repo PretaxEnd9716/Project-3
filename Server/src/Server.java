@@ -171,7 +171,7 @@ public class Server {
 
         //Update VN,RU,and DS
         versionNum = Collections.max(VNList);
-        replicasUpdate = Collections.max(RUList);
+        replicasUpdate = partition.size();
         distinguishedSite = Collections.min(DSList);
     }
 }
