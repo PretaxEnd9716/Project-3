@@ -9,13 +9,13 @@ Instructions
 Message: 1
 Write Successful
 Version Number: 2
-Replicas Updated: 9
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 2
 Write Successful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [0, 1, 2, 3]
@@ -26,13 +26,13 @@ Connected to Server 3
 Message: 3
 Write Successful
 Version Number: 4
-Replicas Updated: 11
+Replicas Updated: 4
 Distinguished Site: 0
 
 Message: 4
 Write Successful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 
 New Partition: [0]
@@ -40,13 +40,13 @@ New Partition: [0]
 Message: 5
 Write Unsuccessful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 
 Message: 6
 Write Unsuccessful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 
 New Partition: [0]
@@ -54,13 +54,13 @@ New Partition: [0]
 Message: 7
 Write Unsuccessful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 
 Message: 8
 Write Unsuccessful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 Closing Server
 
@@ -68,30 +68,30 @@ Closing Server
 Message: 1
 Write Successful
 Version Number: 2
-Replicas Updated: 9
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 2
 Write Successful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [0, 1, 2, 3]
 Connected to Server 0
-Connected to Server 2
+Connected to Server 4
 Connected to Server 3
 
 Message: 3
 Write Successful
 Version Number: 4
-Replicas Updated: 11
+Replicas Updated: 4
 Distinguished Site: 0
 
 Message: 4
 Write Successful
 Version Number: 5
-Replicas Updated: 12
+Replicas Updated: 4
 Distinguished Site: 0
 
 New Partition: [1, 2, 3]
@@ -101,13 +101,13 @@ Connected to Server 3
 Message: 5
 Write Successful
 Version Number: 6
-Replicas Updated: 13
+Replicas Updated: 3
 Distinguished Site: 1
 
 Message: 6
 Write Successful
 Version Number: 7
-Replicas Updated: 14
+Replicas Updated: 3
 Distinguished Site: 1
 
 New Partition: [1, 2, 3, 4, 5, 6]
@@ -120,13 +120,13 @@ Connected to Server 6
 Message: 7
 Write Successful
 Version Number: 8
-Replicas Updated: 15
+Replicas Updated: 6
 Distinguished Site: 1
 
 Message: 8
 Write Successful
 Version Number: 9
-Replicas Updated: 16
+Replicas Updated: 6
 Distinguished Site: 1
 Closing Server
 
@@ -134,13 +134,13 @@ Closing Server
 Message: 1
 Write Successful
 Version Number: 2
-Replicas Updated: 9
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 2
 Write Successful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [4, 5, 6, 7]
@@ -151,13 +151,13 @@ Connected to Server 7
 Message: 3
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 4
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [4, 5, 6]
@@ -167,13 +167,13 @@ Connected to Server 5
 Message: 5
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 6
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [1, 2, 3, 4, 5, 6]
@@ -186,13 +186,13 @@ Connected to Server 5
 Message: 7
 Write Successful
 Version Number: 8
-Replicas Updated: 15
+Replicas Updated: 6
 Distinguished Site: 1
 
 Message: 8
 Write Successful
 Version Number: 9
-Replicas Updated: 16
+Replicas Updated: 6
 Distinguished Site: 1
 Closing Server
 
@@ -200,13 +200,13 @@ Closing Server
 Message: 1
 Write Successful
 Version Number: 2
-Replicas Updated: 9
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 2
 Write Successful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [4, 5, 6, 7]
@@ -217,13 +217,13 @@ Connected to Server 6
 Message: 3
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 4
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [7]
@@ -231,13 +231,13 @@ New Partition: [7]
 Message: 5
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 6
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 New Partition: [7]
@@ -245,12 +245,12 @@ New Partition: [7]
 Message: 7
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 
 Message: 8
 Write Unsuccessful
 Version Number: 3
-Replicas Updated: 10
+Replicas Updated: 8
 Distinguished Site: 0
 Closing Server

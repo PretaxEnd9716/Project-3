@@ -54,7 +54,6 @@ public class Server {
             if(hasMajority) {
                 System.out.println("Write Successful");
                 versionNum++;
-                replicasUpdate++;
             }
             else {
                 System.out.println("Write Unsuccessful");
@@ -205,7 +204,6 @@ public class Server {
         
         if(hasMajority && versionNum < messages + 1) {
             versionNum = messages + 1;
-            replicasUpdate = messages + 8;
         }
     }
 }
