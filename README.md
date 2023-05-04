@@ -1,4 +1,4 @@
-# Project-3
+# Project-3 by Joshua Durana and Dominic Li
 
 Instructions
 - Run server program on DC01-08 servers
